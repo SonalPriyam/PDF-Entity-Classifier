@@ -1,0 +1,6 @@
+pdf2image
+PyMuPDF
+transformers
+torch
+numpy
+Pillow
