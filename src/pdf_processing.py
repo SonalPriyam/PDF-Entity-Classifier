@@ -1,11 +1,16 @@
 from pdf2image import convert_from_path
 import fitz  # PyMuPDF
 
-def pdf_to_images(pdf_path, dpi=300):
-    poppler_path = r"C:\poppler-23.05.0\poppler-24.08.0\Library\bin"
-    pages = convert_from_path(pdf_path, dpi=dpi, poppler_path=poppler_path)
+def pdf_to_images(pdf_path, dpi=50):
+    poppler_path = r"C:\poppler-23.05.0\poppler-24.08.0\Library\bin"  # Update this if your poppler path is different
+    pages = convert_from_path(
+        pdf_path,
+        dpi=dpi,
+        poppler_path=poppler_path,
+        first_page=1,
+        last_page=1
+    )
     return pages
-
 
 def extract_text_blocks(pdf_path):
     """Extract text blocks with bbox and font size using PyMuPDF."""
@@ -33,3 +38,5 @@ def extract_text_blocks(pdf_path):
                     })
         all_pages_blocks.append(page_blocks)
     return all_pages_blocks
+
+

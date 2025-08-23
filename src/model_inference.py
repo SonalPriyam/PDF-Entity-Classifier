@@ -1,3 +1,7 @@
+import pytesseract
+
+# Set the path to the installed Tesseract executable
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 from transformers import LayoutLMv3Processor, LayoutLMv3ForTokenClassification
 import torch
 
