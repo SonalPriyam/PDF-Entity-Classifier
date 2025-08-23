@@ -2,18 +2,25 @@ from pdf2image import convert_from_path
 import fitz  # PyMuPDF
 
 def pdf_to_images(pdf_path, dpi=50):
-    poppler_path = r"C:\poppler-23.05.0\poppler-24.08.0\Library\bin"  # Update this if your poppler path is different
+    """
+    Convert all pages of PDF to images at specified dpi.
+    Uses poppler for conversion.
+    """
+    poppler_path = r"C:\poppler-23.05.0\poppler-24.08.0\Library\bin"  # Update if necessary
+    # Convert all pages by not limiting first_page or last_page
     pages = convert_from_path(
         pdf_path,
         dpi=dpi,
-        poppler_path=poppler_path,
-        first_page=1,
-        last_page=1
+        poppler_path=poppler_path
     )
     return pages
 
+
 def extract_text_blocks(pdf_path):
-    """Extract text blocks with bbox and font size using PyMuPDF."""
+    """
+    Extract text blocks (with bounding boxes and font sizes) from all pages of a PDF using PyMuPDF.
+    Returns a list where each element is a list of blocks for that page.
+    """
     doc = fitz.open(pdf_path)
     all_pages_blocks = []
 

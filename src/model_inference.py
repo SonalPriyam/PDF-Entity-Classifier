@@ -1,9 +1,11 @@
 import pytesseract
 
-# Set the path to the installed Tesseract executable
+# Set Tesseract path 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
 from transformers import LayoutLMv3Processor, LayoutLMv3ForTokenClassification
 import torch
+import torch.nn.functional as F
 
 def load_model(num_labels):
     processor = LayoutLMv3Processor.from_pretrained("microsoft/layoutlmv3-base")
@@ -18,31 +20,36 @@ def load_model(num_labels):
 
 def predict_entities(processor, model, device, images, text_blocks):
     """
-    Perform entity classification on each page.
-    images: list of PIL images
-    text_blocks: corresponding list of text blocks with bbox info
+    Perform entity classification on each page image.
+    Returns list of dicts with text, bbox, predicted_class, and confidence.
     """
     results = []
+    
+    # Map numeric label indices to class names
+    class_names = [
+        "Header", "Table", "Text", "Figure", "Equation", "Chart", "Footer", "Other"
+    ]
+    
     for img, blocks in zip(images, text_blocks):
-        # Prepare model inputs for LayoutLMv3 here:
-        # Tokenization & layout mapping must be done per model requirements
-        # For simplicity this is a placeholder example:
         encoding = processor(img, return_tensors="pt")
         encoding = {k: v.to(device) for k, v in encoding.items()}
 
         with torch.no_grad():
             outputs = model(**encoding)
         
-        logits = outputs.logits.detach().cpu()
-        predictions = torch.argmax(logits, dim=2).squeeze().tolist()
-        
-        # Map predictions back to text_blocks - here simplified:
+        logits = outputs.logits.squeeze(0).detach().cpu()  
+        probs = F.softmax(logits, dim=1)  
+        predictions = torch.argmax(logits, dim=1).tolist()
+        confidences = probs.max(dim=1).values.tolist()
+
         page_result = []
-        for block, pred in zip(blocks, predictions):
+        for block, pred, conf in zip(blocks, predictions, confidences):
             page_result.append({
                 "text": block['text'],
                 "bbox": block['bbox'],
-                "predicted_class": pred
+                "predicted_class": class_names[pred] if pred < len(class_names) else "Unknown",
+                "confidence": conf
             })
         results.append(page_result)
     return results
+
